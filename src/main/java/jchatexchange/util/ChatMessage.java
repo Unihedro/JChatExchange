@@ -22,9 +22,23 @@ public final class ChatMessage implements ReceivableChatHandle, SendableChatHand
 
     private transient User user;
 
-    public ChatMessage(final int user_id, final String content) {
+    /**
+     * This constructor writes to the <tt>final</tt> fields with the given
+     * <tt>user_id</tt> and <tt>content</tt>. If <tt>content</tt> is
+     * <tt>null</tt>, an empty {@link String} literal is used instead:
+     * <p>
+     * <tt>""</tt>
+     * </p>
+     *
+     * @param user_id
+     *        The user.
+     * @param content
+     *        The message itself.
+     */
+    public ChatMessage(final int user_id, final String content) throws IllegalArgumentException {
+        if (user_id < 0)
+            throw new IllegalArgumentException("\"user_id\" is negative: " + user_id);
         this.user_id = user_id;
-        // Validate.notNull(sender, "sender cannot be null for public ChatMessage()");
         if (null == content)
             this.content = "";
         else this.content = content;
@@ -46,9 +60,12 @@ public final class ChatMessage implements ReceivableChatHandle, SendableChatHand
 
     ChatMessage(final Map<String, Object> jsonObject) throws IllegalArgumentException {
         final Object user_id = jsonObject.get("user_id");
-        if (null == user_id)
-            throw new IllegalArgumentException("");
-        this.user_id = (Integer) user_id;
+        try {
+            if (null == user_id || (this.user_id = (Integer) user_id) < 0)
+                throw new IllegalArgumentException("jsonObject.get(\"user_id\") is not a positive integer: " + user_id);
+        } catch(ClassCastException ex) {
+            throw new IllegalArgumentException("jsonObject.get(\"user_id\") object is not Integer: " + user_id);
+        }
 
         final Object content = jsonObject.get("content");
         if (null == content)
