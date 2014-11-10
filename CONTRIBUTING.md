@@ -12,7 +12,7 @@
   * Never change existing interfaces as hacks (they're terrible), instead expand with the best code which does what you want and deprecate the old methods.<br><sup>Add `@Deprecated` to old methods and document this change.</sup>
 - Does your change preserve [the goals of the library](#goals), and fit [most of these criterias](#checklist)?
 - Make your changes in your fork, and test your changes.
-- _Confirm that it [(at least loosely) follows out formatting guidelines][formatting] for contributing. **- TBD**_
+- _Confirm that it [(at least loosely) follows our formatting guidelines][formatting] for contributing. **- TBD**_
 - Push to your fork and submit a pull request.
 
 ## <a name="goals"></a>Goals
@@ -28,6 +28,7 @@ JChatExchange is built in Java 8. <!-- Java 6 support is planned. --> <!-- maybe
 
 ## <a name="checklist"></a>Quick Guide, 2
 When contributing, __please ask yourself__:
+
 1. Does the change expose or rely on an implementation detail or flaw which will change over time?
 
     If your change enables developers having to work around an implementation detail then it is not a proper API design. Examples of bad API design would be something revolving a packet storage API, or basing enums on return states of server responses.
