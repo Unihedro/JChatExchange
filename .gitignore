@@ -1,0 +1,13 @@
+# Eclipse stuff
+.project
+.classpath
+.settings/*
+
+# IDE Junk
+/bin
+*.class
+
+# We use Maven!
+/target
+target/*
+*.orig
