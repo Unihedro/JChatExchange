@@ -15,4 +15,4 @@ package jchatexchange.util;
  * @author Unihedron<<a href="mailto:vincentyification@gmail.com"
  *         >vincentyification@gmail.com</a>>
  */
-public interface ReceivableChatHandle {}
+public interface ReceivableChatHandle extends ChatHandle {}

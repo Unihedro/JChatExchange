@@ -73,12 +73,36 @@ public final class ChatMessage implements ReceivableChatHandle, SendableChatHand
         else this.content = (String) content;
     }
 
+    /**
+     * <p>
+     * Gets the corresponding {@link User} object. If the object is absent from
+     * the cache pool, we will attempt to ask the corresponding {@link ZZZ Chat}
+     * instance to parse the room response string after a refresh of the room.
+     * </p>
+     * <p>
+     * There is no guarantee for thread-safetiness of the implementation or
+     * execution of this method, however in future implementations this method
+     * will become thread-safe.
+     * </p>
+     * <p>
+     * However, for all {@link User} objects returned by calling this method, it
+     * is guaranteed that the user is online at the moment of calling.
+     * Otherwise, <tt>null</tt> is returned.
+     * </p>
+     *
+     * @return The user, <tt>null</tt> if the sender of this message is not
+     *         online or the user ID is invalid.
+     */
     public User getUser() {
         // if (null == user)
         //     user = magic.get(user_id); // get from cache
         return user;
     }
 
+    /**
+     * Chat messages has an ID of 1. The <tt>event_type</tt> of a JSONevent
+     * response from the chat servers are <tt>1</tt>, hence this value.
+     */
     public int getId() {
         return 1;
     }
