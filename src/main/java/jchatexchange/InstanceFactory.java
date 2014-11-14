@@ -1,5 +1,7 @@
 package jchatexchange;
 
-public final class InstanceFactory {
+import jchatexchange.factory.Factory;
+
+final class InstanceFactory implements Factory {
 
 }
