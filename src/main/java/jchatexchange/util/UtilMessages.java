@@ -20,6 +20,7 @@ class UtilMessages implements MessageBundleLoader {
     public static MessageBundle bundle;
     private Lock                lock = new ReentrantLock();
 
+    @Override
     public MessageBundle getBundle() {
         if (null == bundle)
             init();

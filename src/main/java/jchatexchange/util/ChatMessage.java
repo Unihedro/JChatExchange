@@ -103,6 +103,7 @@ public final class ChatMessage implements ReceivableChatHandle, SendableChatHand
      * Chat messages has an ID of 1. The <tt>event_type</tt> of a JSONevent
      * response from the chat servers are <tt>1</tt>, hence this value.
      */
+    @Override
     public int getId() {
         return 1;
     }
