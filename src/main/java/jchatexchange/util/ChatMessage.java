@@ -1,8 +1,13 @@
 package jchatexchange.util;
 
-import java.util.Map;
+import java.io.Serializable;
+import java.util.List;
 
-import org.json.simple.JSONObject;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
+
+import jchatexchange.factory.FactoryMeta;
 
 /**
  * <p>
@@ -14,64 +19,85 @@ import org.json.simple.JSONObject;
  * @author Unihedron<<a href="mailto:vincentyification@gmail.com"
  *         >vincentyification@gmail.com</a>>
  */
-// @ThreadSafe
-public final class ChatMessage implements ReceivableChatHandle, SendableChatHandle /*, Serializable*/{
+@ThreadSafe
+public abstract class ChatMessage implements ReceivableChatHandle, SendableChatHandle, Serializable {
 
-    public final int       user_id;
+    static final int       NONE = 0;
+
+    public final int       userId;
+    public final int       messageId;
     public final String    content;
 
     private transient User user;
 
-    /**
-     * This constructor writes to the <tt>final</tt> fields with the given
-     * <tt>user_id</tt> and <tt>content</tt>. If <tt>content</tt> is
-     * <tt>null</tt>, an empty {@link String} literal is used instead:
-     * <p>
-     * <tt>""</tt>
-     * </p>
-     *
-     * @param user_id
-     *        The user.
-     * @param content
-     *        The message itself.
-     */
-    public ChatMessage(final int user_id, final String content) throws IllegalArgumentException {
-        if (user_id < 0)
-            throw new IllegalArgumentException("\"user_id\" is negative: " + user_id);
-        this.user_id = user_id;
-        if (null == content)
-            this.content = "";
-        else this.content = content;
+    protected ChatMessage(User user, String content) {
+        this(user.id, NONE, content);
+        this.user = user;
+    }
+
+    protected ChatMessage(int userId, int messageId, String content) {
+        this.userId = userId;
+        this.messageId = messageId;
+        this.content = content;
     }
 
     /**
-     * This constructor calls an underlying package-level constructor.
+     * Gets the latest contents of the message. Depending on settings of the
+     * library, this may be arbitrarily unhelpful; By default, HTML is returned.
      *
-     * @param jsonObject
-     *        A JSONObject which includes values mapped by <tt>user_id</tt> and
-     *        <tt>content</tt>.
-     * @throws IllegalArgumentException
-     *         When <tt>jsonObject.get("user_id")</tt> is <tt>null</tt>.
+     * @return The contents of the message. This can be expected to be of the
+     *         latest version.
      */
-    public ChatMessage(final JSONObject jsonObject) throws IllegalArgumentException {
-        // For public invocation, we only allow JSONObjects.
-        this((Map) jsonObject);
+    public String getContent() {
+        return content;
     }
 
-    ChatMessage(final Map<String, Object> jsonObject) throws IllegalArgumentException {
-        final Object user_id = jsonObject.get("user_id");
-        try {
-            if (null == user_id || (this.user_id = (Integer) user_id) < 0)
-                throw new IllegalArgumentException("jsonObject.get(\"user_id\") is not a positive integer: " + user_id);
-        } catch(ClassCastException ex) {
-            throw new IllegalArgumentException("jsonObject.get(\"user_id\") object is not Integer: " + user_id);
-        }
+    /**
+     * Gets the contents of the message in specified message type.
+     * Implementation dependent.
+     *
+     * @param type
+     *        The type of the message to retrieve. Custom
+     *        {@link FactoryMeta.MessageType MessageType}s should be handled by
+     *        its subclasses.
+     * @return The contents of the message. If it's not found, <tt>null</tt>
+     *         should be returned.
+     * @throws IllegalStateException
+     *         When this <tt>ChatMessage</tt> object was not received from the
+     *         server, instead constructed and doesn't include a proper type.
+     * @throws UnauthorizedInvocationException
+     *         When the {@link jchatexchange.factory.Factory Factory} creating
+     *         the agent which created this <tt>ChatMessage</tt> object was
+     *         specified to throw an exception on invocation of this method.
+     * @see FactoryMeta.MessageType#request(jchatexchange.factory.WebAgent,
+     *      ChatMessage)
+     */
+    @Nullable
+    protected abstract String getContent(@Nonnull FactoryMeta.MessageType type) throws IllegalStateException, UnauthorizedInvocationException;
 
-        final Object content = jsonObject.get("content");
-        if (null == content)
-            this.content = "";
-        else this.content = (String) content;
-    }
+    /**
+     * The history of this message. This is expected to be of chronological
+     * order where the first element is the first version of the message ever
+     * posted.
+     *
+     * @param meta
+     *        The details of retrieving the history of this <tt>ChatMessage</tt>
+     *        object as. The metadata object does not need to specify this
+     *        implementation, as the {@link jchatexchange.factory.Factory
+     *        Factory} the meta object links to should include information
+     *        required. TODO document <tt>null</tt>
+     * @return The history of this message. Due to technical limitations, this
+     *         should always return text sent in its markdown format.
+     * @throws IllegalStateException
+     *         When this <tt>ChatMessage</tt> object was not received from the
+     *         server, instead constructed and doesn't include a proper type.
+     * @throws UnauthorizedInvocationException
+     *         When the {@link jchatexchange.factory.Factory Factory} creating
+     *         the agent which created this <tt>ChatMessage</tt> object was
+     *         specified to throw an exception on invocation of this method.
+     */
+    @Nullable
+    public abstract List<String> getHistoryAs(@Nullable FactoryMeta meta) throws IllegalStateException, UnauthorizedInvocationException;
 
     /**
      * <p>
@@ -82,7 +108,7 @@ public final class ChatMessage implements ReceivableChatHandle, SendableChatHand
      * <p>
      * There is no guarantee for thread-safetiness of the implementation or
      * execution of this method, however in future implementations this method
-     * will become thread-safe.
+     * will be thread-safe.
      * </p>
      * <p>
      * However, for all {@link User} objects returned by calling this method, it
@@ -107,4 +133,5 @@ public final class ChatMessage implements ReceivableChatHandle, SendableChatHand
     public int getId() {
         return 1;
     }
+
 }
